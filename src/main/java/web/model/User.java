@@ -12,6 +12,28 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.io.IOException;
 
+@NamedNativeQueries(value = {
+        @NamedNativeQuery(name = "User.cleanTable", query = "TRUNCATE TABLE users"),
+        @NamedNativeQuery(name = "User.deleteTable", query = "DROP TABLE IF EXISTS users CASCADE"),
+        @NamedNativeQuery(name = "User.createTable", query = "CREATE TABLE IF NOT EXISTS users ("
+                                                            + "id SERIAL PRIMARY KEY,"
+                                                            + "firstName VARCHAR(255) NOT NULL,"
+                                                            + "lastName VARCHAR(255) NOT NULL,"
+                                                            + "age INT NOT NULL,"
+                                                            + "address VARCHAR(255),"
+                                                            + "email VARCHAR(255) NOT NULL,"
+                                                            + "sex VARCHAR(50),"
+                                                            + "role VARCHAR(50),"
+                                                            + "car_id BIGINT REFERENCES cars(id) ON DELETE CASCADE"
+                                                            + ");"),
+
+
+        @NamedNativeQuery(name = "User.existTable", query = "SELECT CASE WHEN EXISTS ("
+                                                            + "SELECT 1 FROM information_schema.tables "
+                                                            + "WHERE table_name = 'users'"
+                                                            + ") THEN true ELSE false END")
+})
+
 @Entity
 @Table(name = "users", schema = "public", catalog = "postgres")
 @Getter
@@ -116,3 +138,4 @@ public class User extends MyEntity {
         }
     }
 }
+

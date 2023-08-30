@@ -1,11 +1,11 @@
-package web.dao;
+package web.repository;
 
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public interface GenericDao {
+public interface GenericRep {
     <T> void add(T entity);
 
     <T> void merge(T entity);
@@ -20,5 +20,5 @@ public interface GenericDao {
 
     <T> List<T> allItems(Class<T> cls);
 
-    void resetTable();
+    void queryExecutor(String namedQuery);
 }
