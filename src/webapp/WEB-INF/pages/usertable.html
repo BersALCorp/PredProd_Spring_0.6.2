@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      lang="ru" xml:lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <title>User Management</title>
+</head>
+<body>
+<h1>User Management</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Gender</th>
+        <th>Years old</th>
+        <th>Address</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Car</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <!--/*@thymesVar id="userList" type="web.model.User"*/-->
+    <tr th:each="user : ${userList}" th:if="${user != null}">
+        <td>
+            <label for="id"></label>
+            <input type="text" id="id" name="id" th:value="${user.id}" disabled>
+        </td>
+        <td>
+            <label for="firstName"></label>
+            <input type="text" id="firstName" name="firstName" th:value="${user.firstName}" disabled>
+        </td>
+        <td>
+            <label for="lastName"></label>
+            <input type="text" id="lastName" name="lastName" th:value="${user.lastName}" disabled>
+        </td>
+        <td>
+            <label for="sex"></label>
+            <select id="sex" name="sex" onchange="updateSelectedSex(this)" disabled>
+                <option th:each="sex : ${T(web.model.SexEnum).values()}"
+                        th:value="${sex.name()}" th:text="${sex.displayName}"
+                        th:selected="${sex == user.sex}"></option>
+            </select>
+        </td>
+        <td>
+            <label for="age"></label>
+            <input type="number" id="age" name="age" min="0" step="1" required th:value="${user.age}" disabled>
+        </td>
+        <td>
+            <label for="address"></label>
+            <input type="text" id="address" name="address" th:value="${user.address}" disabled>
+        </td>
+        <td>
+            <label for="email"></label>
+            <input type="email" id="email" name="email" th:value="${user.email}" disabled>
+        </td>
+        <td>
+            <label for="role"></label>
+            <select id="role" name="role" onchange="updateSelectedRole(this)" disabled>
+                <option th:each="role : ${T(web.model.RoleEnum).values()}"
+                        th:value="${role.name()}" th:text="${role.displayName}"
+                        th:selected="${role == user.role}"></option>
+            </select>
+        </td>
+        <td>
+            <button th:if="${user.car}" onclick="carButton(this)">VIEW</button>
+            <button th:unless="${user.car}" onclick="carButton(this)"> ADD</button>
+        </td>
+        <td>
+            <button onclick="edit(this)">EDIT</button>
+            <button onclick="updateUser(this)" style="display: none">SAVE</button>
+            <button onclick="deleteUser(this)">DELETE</button>
+        </td>
+    </tr>
+    </tbody>
+
+    <tbody id="userTableBody">
+    </tbody>
+
+    <tbody id="addUserRow">
+    <tr>
+        <td>NEW PERSON</td>
+        <td>
+            <label for="newFirstName"></label>
+            <input type="text" id="newFirstName" name="firstName" value="">
+        </td>
+        <td>
+            <label for="newLastName"></label>
+            <input type="text" id="newLastName" name="lastName" value="">
+        </td>
+        <td>
+            <label for="newSex"></label>
+            <select id="newSex" name="sex" onchange="updateSelectedSex(this)">
+                <option th:each="sex : ${T(web.model.SexEnum).values()}"
+                        th:value="${sex.name()}" th:text="${sex.displayName}"></option>
+            </select>
+        </td>
+        <td>
+            <label for="newAge"></label>
+            <input type="number" id="newAge" name="age" min="0" step="1" value="">
+        </td>
+        <td>
+            <label for="newAddress"></label>
+            <input type="text" id="newAddress" name="address" value="">
+        </td>
+        <td>
+            <label for="newEmail"></label>
+            <input type="email" id="newEmail" name="email" value="">
+        </td>
+        <td>
+            <label for="newRole"></label>
+            <select id="newRole" name="role" onchange="updateSelectedRole(this)">
+                <option th:each="role : ${T(web.model.RoleEnum).values()}"
+                        th:value="${role.name()}" th:text="${role.displayName}"></option>
+            </select>
+        </td>
+        <td>
+        </td>
+        <td>
+            <button onclick="saveUser(this); return false;">ADD USER</button>
+        </td>
+    </tr>
+    <tr>
+        <td>
+        <td>
+        <td>
+        <td>
+        <td>
+            <button onclick="clearTable()">CLEAR TABLE</button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div id="popup" class="popup">
+    <div class="popup-content">
+        <span class="close" onclick="closePopup()">&times;</span>
+
+    </div>
+</div>
+
+
+<script>
+
+    function saveUser(button) {
+        const row = button.closest('tr');
+        const inputs = row.querySelectorAll('input, select');
+        const data = {};
+
+        inputs.forEach(input => {
+            data[input.name] = input.value;
+            input.setAttribute('disabled', 'disabled');
+        });
+
+        fetch('/saveUser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Request failed');
+                }
+            })
+            .then(responseData => {
+                const newUser = responseData.user;
+                const message = responseData.message;
+
+                console.log('User saved:', newUser);
+                console.log('massage:', message);
+
+                const newUserRow = createTableRow(newUser);
+                const tableBody = document.getElementById('userTableBody');
+                const addUserRow = document.getElementById('addUserRow');
+                tableBody.appendChild(newUserRow);
+                clearAddRowInputs(addUserRow);
+                enableInputs(addUserRow);
+                // location.reload();
+            })
+            .catch(error => {
+                console.error('Error save user:', error);
+            });
+    }
+
+    function updateUser(button) {
+        const row = button.closest('tr');
+        const inputs = row.querySelectorAll('input, select');
+        const data = {};
+
+        inputs.forEach(input => {
+            data[input.name] = input.value;
+            input.setAttribute('disabled', 'disabled');
+        })
+        button.style.display = 'none';
+        button.previousElementSibling.style.display = 'inline-block';
+        fetch('/updateUser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data),
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Update successful");
+                } else {
+                    throw new Error('Request failed');
+                }
+            })
+            .catch(error => {
+                console.error('Update error:', error);
+            });
+
+    }
+
+    function saveCar(userId) {
+        const brandInput = document.querySelector('input[name="brand"]');
+        const seriesInput = document.querySelector('input[name="series"]');
+        const modelInput = document.querySelector('input[name="model"]');
+        const colorInput = document.querySelector('input[name="color"]');
+
+        const carData = {
+            brand: brandInput.value,
+            series: seriesInput.value,
+            model: modelInput.value,
+            color: colorInput.value
+        };
+
+        fetch('/saveCar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                userId: userId,
+                carData: carData
+            })
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    throw new Error('Request for save car failed');
+                }
+            })
+            .then(responseText => {
+                console.log('User save car:', responseText);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function updateCar(userId) {
+        const brandInput = document.querySelector('input[name="brand"]');
+        const seriesInput = document.querySelector('input[name="series"]');
+        const modelInput = document.querySelector('input[name="model"]');
+        const colorInput = document.querySelector('input[name="color"]');
+
+        const carData = {
+            brand: brandInput.value,
+            series: seriesInput.value,
+            model: modelInput.value,
+            color: colorInput.value
+        };
+
+        fetch('/updateCar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                userId: userId,
+                carData: carData
+            })
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    throw new Error('Request for update car failed');
+                }
+            })
+            .then(responseText => {
+                console.log('User update car:', responseText);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function deleteCar(id) {
+        const params = new URLSearchParams({id: id});
+        return fetch(`/deleteCar?${params}`, {
+            method: 'POST'
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    throw new Error('Request for delete Car failed');
+                }
+            })
+            .then(responseText => {
+                console.log('Car delete:', responseText);
+            })
+            .catch(error => {
+                console.error('Error deleting car:', error);
+            });
+    }
+
+    function deleteUser(button) {
+        const row = button.parentNode.parentNode;
+        const idElement = row.querySelector('input[name="id"]');
+        const userId = idElement.value;
+        const id = Number(userId);
+
+        const params = new URLSearchParams({id: id});
+
+        return fetch(`/deleteUser?${params}`, {
+            method: 'POST'
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    throw new Error('Request for delete User failed');
+                }
+            })
+            .then(responseText => {
+                row.remove();
+                console.log('User delete:', responseText);
+            })
+            .catch(error => {
+                console.error('Error deleting user:', error);
+            });
+    }
+
+    function clearTable() {
+
+        return fetch(`/clearTable`, {
+            method: 'POST'
+        })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                    return response.text();
+                } else {
+                    throw new Error('Request for clear table failed');
+                }
+            })
+            .then(responseText => {
+                console.log('Table was clean:', responseText);
+            })
+            .catch(error => {
+                console.error('Error cleaning table:', error);
+            });
+    }
+
+    function getCarByUserId(id) {
+        // Выполните запрос на получение данных о машине с заданным идентификатором
+        // и верните результат в виде Promise
+        const params = new URLSearchParams({id: id});
+        return fetch(`/getcar?${params}`, {
+            method: 'POST'
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Request failed');
+                }
+            })
+            .then(responseData => {
+                const gatsCar = responseData.car;
+                const message = responseData.message;
+
+                console.log('Car:', gatsCar);
+                console.log('massage:', message);
+
+                return gatsCar;
+            })
+            .catch(error => {
+                console.error('Error save user:', error);
+            });
+    }
+
+    function createTableRow(user) {
+        const row = document.createElement('tr');
+        const idCell = createTableCell('text', 'id', user.id, true);
+        row.appendChild(idCell);
+        const firstNameCell = createTableCell('text', 'firstName', user.firstName, true);
+        row.appendChild(firstNameCell);
+        const lastNameCell = createTableCell('text', 'lastName', user.lastName, true);
+        row.appendChild(lastNameCell);
+        const sexCell = createSelectCellForSex('sex', user.sex.displayName);
+        row.appendChild(sexCell);
+        const ageCell = createTableCell('text', 'age', user.age, true);
+        row.appendChild(ageCell);
+        const addressCell = createTableCell('text', 'address', user.address, true);
+        row.appendChild(addressCell);
+        const emailCell = createTableCell('email', 'email', user.email, true);
+        row.appendChild(emailCell);
+        const roleCell = createSelectCellForRole('role', user.role.displayName);
+        row.appendChild(roleCell);
+        const actionCell = document.createElement('td');
+        const carCell = document.createElement('td');
+        row.appendChild(carCell)
+        row.appendChild(actionCell)
+        const editButton = createButton('EDIT', 'edit(this)');
+        const saveButton = createButton('SAVE', 'updateUser(this)', 'none');
+        const deleteButton = createButton(' DELETE', 'deleteUser(this)');
+        const carButton = createButton(' ADD', 'carButton(this)', 'inline-block');
+
+        carButton.dataset.id = user.id;
+        carCell.appendChild(carButton);
+        actionCell.appendChild(editButton);
+        actionCell.appendChild(saveButton);
+        actionCell.appendChild(deleteButton);
+        return row;
+    }
+
+    async function carButton(button) {
+        var userRow = button.closest('tr');
+        const userIdInput = userRow.querySelector('input[name="id"]');
+        const userId = userIdInput.value;
+        const id = Number(userId);
+
+        disableInputs(userRow);
+        showPopup();
+        const userTableRow = await createPopupCar(id);
+        const popupContent = document.querySelector('.popup-content');
+        popupContent.innerHTML = '';
+        popupContent.appendChild(userTableRow);
+    }
+
+    async function createPopupCar(id) {
+        const popupContent = document.createElement('div');
+        popupContent.classList.add('popup-content');
+
+        const car = await getCarByUserId(id);
+
+        const closeButton = document.createElement('span');
+        closeButton.classList.add('close');
+        closeButton.textContent = '×';
+        closeButton.onclick = closePopup;
+        popupContent.appendChild(closeButton);
+
+        const header = document.createElement('h2');
+        header.textContent = 'User Car';
+        popupContent.appendChild(header);
+        const excludeFields = ['toStringCalled', 'user', 'id'];
+
+        const carTable = document.createElement('table');
+        const carTableHead = document.createElement('thead');
+        const carTableHeadRow = document.createElement('tr');
+        const carTableBody = document.createElement('tbody');
+        const carTableRow = document.createElement('tr');
+
+        const carKeys = Object.keys(car);
+        carKeys.forEach(key => {
+            if (excludeFields.includes(key)) {
+                return;
+            }
+            const headerCell = document.createElement('th');
+            headerCell.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+            carTableHeadRow.appendChild(headerCell);
+
+            const dataCell = document.createElement('td');
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = key;
+            input.value = car[key];
+            input.disabled = true;
+            dataCell.appendChild(input);
+            carTableRow.appendChild(dataCell);
+        });
+
+        const actionHeaderCell = document.createElement('th');
+        actionHeaderCell.textContent = 'Action';
+        carTableHeadRow.appendChild(actionHeaderCell);
+
+        const addButtonCell = document.createElement('tr');
+        const editButtonCell = document.createElement('tr');
+        const saveButtonCell = document.createElement('tr');
+        const deleteButtonCell = document.createElement('td');
+
+        const editButton = document.createElement('button');
+        editButton.textContent = 'EDIT';
+        editButton.setAttribute('type', 'button');
+        editButton.onclick = function () {
+            event.stopPropagation();
+            enableInputs(carTableRow);
+            editButton.style.display = 'none';
+            saveButton.style.display = 'inline-block';
+        };
+
+        const saveButton = document.createElement('button');
+        saveButton.textContent = 'SAVE';
+        saveButton.setAttribute('type', 'button');
+        saveButton.onclick = function () {
+            event.stopPropagation();
+            disableInputs(carTableRow);
+            saveButton.style.display = 'none';
+            editButton.style.display = 'inline-block';
+            updateCar(id);
+        };
+
+        const addButton = document.createElement('button');
+        addButton.textContent = 'ADD';
+        addButton.setAttribute('type', 'button');
+        addButton.onclick = function () {
+            event.stopPropagation();
+            disableInputs(carTableRow);
+            editButton.style.display = 'inline-block';
+            saveButton.style.display = 'none';
+            deleteButton.style.display = 'inline-block';
+            addButton.style.display = 'none';
+            saveCar(id);
+        };
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'DELETE';
+        deleteButton.setAttribute('type', 'button');
+        deleteButton.onclick = function () {
+            event.stopPropagation();
+            enableInputs(carTableRow);
+            clearAddRowInputs(carTableRow)
+            editButton.style.display = 'none';
+            saveButton.style.display = 'none';
+            deleteButton.style.display = 'none';
+            addButton.style.display = 'inline-block';
+            deleteCar(id);
+        };
+
+        if (car.id === null) {
+            enableInputs(carTableRow);
+            editButton.style.display = 'none';
+            deleteButton.style.display = 'none';
+            addButton.style.display = 'inline-block';
+            saveButton.style.display = 'none'; // скрываем кнопку SAVE
+        } else {
+            editButton.style.display = 'inline-block';
+            deleteButton.style.display = 'inline-block';
+            addButton.style.display = 'none';
+            saveButton.style.display = 'none'; // отображаем кнопку SAVE
+        }
+
+
+        editButtonCell.appendChild(editButton);
+        saveButtonCell.appendChild(saveButton);
+        addButtonCell.appendChild(addButton);
+        deleteButtonCell.appendChild(deleteButton);
+
+        carTableRow.appendChild(editButtonCell);
+        carTableRow.appendChild(saveButtonCell);
+        carTableRow.appendChild(addButtonCell);
+        carTableRow.appendChild(deleteButtonCell);
+
+        carTableHead.appendChild(carTableHeadRow);
+        carTable.appendChild(carTableHead)
+        carTableBody.appendChild(carTableRow);
+        carTable.appendChild(carTableBody);
+        popupContent.appendChild(carTable);
+
+        return popupContent;
+    }
+
+    function showPopup() {
+        var popup = document.getElementById("popup");
+        popup.style.display = "block";
+    }
+
+    function closePopup() {
+        var popup = document.getElementById("popup");
+        popup.style.display = "none";
+        location.reload();
+    }
+
+    function edit(button) {
+        const row = button.closest('tr');
+        enableInputs(row);
+        button.style.display = 'none';
+        button.nextElementSibling.style.display = 'inline-block';
+    }
+
+    function disableInputs(row) {
+        const inputs = row.querySelectorAll('input, select');
+        inputs.forEach(input => input.setAttribute('disabled', 'disabled'));
+    }
+
+    function enableInputs(row) {
+        const inputs = row.querySelectorAll('input, select');
+        inputs.forEach(input => input.removeAttribute('disabled'));
+    }
+
+    function clearAddRowInputs(row) {
+        const rowInputs = row.querySelectorAll('input, select');
+        rowInputs.forEach(input => {
+            if (input.tagName === 'SELECT') {
+                input.selectedIndex = 0;
+            } else {
+                input.value = '';
+            }
+        });
+    }
+
+    function createSelectCellForSex(name, selectedValue) {
+        const cell = document.createElement('td');
+
+        const select = document.createElement('select');
+
+        select.name = name;
+
+        const sexEnumValues = ['MALE', 'FEMALE', 'UNDEFINED'];
+        sexEnumValues.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            if (value === selectedValue) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+            select.setAttribute('disabled', 'disabled');
+        });
+
+        cell.appendChild(select);
+        return cell;
+    }
+
+    function createSelectCellForRole(name, selectedValue) {
+        const cell = document.createElement('td');
+
+        const select = document.createElement('select');
+
+        select.name = name;
+
+        const sexEnumValues = ['UNDEFINED', 'ADMIN', 'USER', 'MANAGER', 'MODERATOR', 'GUEST'];
+        sexEnumValues.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            if (value === selectedValue) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+            select.setAttribute('disabled', 'disabled');
+        });
+
+        cell.appendChild(select);
+        return cell;
+    }
+
+    function updateSelectedSex(selectElement) {
+        const selectedSex = selectElement.value;
+        const rolValue = selectElement.getAttribute('rol');
+        if (rolValue) {
+            enableInputs(rolValue);
+        }
+        console.log('Selected Sex:', selectedSex);
+    }
+
+    function updateSelectedRole(selectElement) {
+        const selectedRole = selectElement.value;
+        const rolValue = selectElement.getAttribute('rol');
+
+        if (rolValue) {
+            enableInputs(rolValue);
+        }
+
+        console.log('Selected Role:', selectedRole);
+    }
+
+    function createTableCell(type, name, value, disabled) {
+        const cell = document.createElement('td');
+        const input = document.createElement('input');
+        input.type = type;
+        input.name = name;
+        input.value = value;
+        if (disabled) {
+            input.setAttribute('disabled', 'disabled');
+        }
+        cell.appendChild(input);
+        return cell;
+    }
+
+    function createButton(text, onclick, display = 'inline-block') {
+        const button = document.createElement('button');
+        button.textContent = text;
+        button.onclick = function () {
+            eval(onclick);
+        };
+        button.style.display = display;
+        return button;
+    }
+
+</script>
+
+<style>
+    .popup {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+
+    .popup-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        position: relative;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+    }
+</style>
+</body>
+</html>
