@@ -15,8 +15,6 @@ public interface UserTableService {
 
     <T> T getById(Class<T> tClass, long e);
 
-    <T> void delete(T t);
-
     void saveCarForUser(Car car, long id);
 
     void updateCar(Car car, long id);

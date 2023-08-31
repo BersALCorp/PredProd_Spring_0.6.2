@@ -47,18 +47,6 @@ public class GenericRepImp implements GenericRep {
         }
     }
 
-    @Transactional
-    @Override
-    public <T> void deleteById(Class<T> tClass, long id) {
-        try {
-            T temp = entityManager.find(tClass, id);
-            entityManager.remove(temp);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error in deleteById. DAO error: " + e);
-            throw e;
-        }
-    }
-
     @Override
     public <T> T find(Class<T> tClass, long id) {
         try {

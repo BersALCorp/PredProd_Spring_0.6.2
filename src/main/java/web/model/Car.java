@@ -9,7 +9,7 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @NamedNativeQueries(value = {
-        @NamedNativeQuery(name = "Car.cleanTable", query = "TRUNCATE TABLE cars"),
+        @NamedNativeQuery(name = "Car.cleanTable", query = "TRUNCATE TABLE cars CASCADE"),
         @NamedNativeQuery(name = "Car.deleteTable", query = "DROP TABLE IF EXISTS cars CASCADE"),
         @NamedNativeQuery(name = "Car.createTable", query = "CREATE TABLE IF NOT EXISTS cars ("
                                                             + "id SERIAL PRIMARY KEY,"
@@ -20,10 +20,6 @@ import javax.persistence.*;
                                                             + "user_id BIGINT REFERENCES users(id) ON DELETE CASCADE"
                                                             + ");"),
 
-        @NamedNativeQuery(name = "Car.existTable", query = "SELECT CASE WHEN EXISTS ("
-                                                            + "SELECT 1 FROM information_schema.tables "
-                                                            + "WHERE table_name = 'cars'"
-                                                            + ") THEN true ELSE false END")
 })
 
 @Entity

@@ -48,14 +48,10 @@ public class UserTableServiceImp implements UserTableService {
         genericRep.merge(tempUser);
     }
 
-    @Override
-    public <T> void delete(T t) {
-        genericRep.delete(t);
-    }
-
+    @Transactional
     @Override
     public <T> void deleteById(Class<T> tClass, long id) {
-        genericRep.deleteById(tClass, id);
+        genericRep.delete(genericRep.find(tClass, id));
     }
 
     @Transactional
@@ -99,6 +95,7 @@ public class UserTableServiceImp implements UserTableService {
     @Override
     public void resetTable() {
         genericRep.queryNameExecutor("User.cleanTable");
+        genericRep.queryNameExecutor("Car.cleanTable");
     }
 
     @Override
