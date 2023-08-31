@@ -30,79 +30,126 @@ public class UserTableServiceImp implements UserTableService {
 
     @Override
     public <T> void add(T t) {
-        genericRep.add(t);
+        try {
+            genericRep.add(t);
+        } catch (Exception e) {
+            System.out.println("Error in service add - " + e);
+        }
     }
 
     @Override
     public <T> T getById(Class<T> tClass, long id) {
-        return genericRep.find(tClass, id);
+        try {
+            return genericRep.find(tClass, id);
+        } catch (Exception e) {
+            System.out.println("Error in service getById - " + e);
+        }
+        return null;
     }
 
     @Transactional
     @Override
     public void updateUser(User user) {
-        User tempUser = genericRep.find(user.getClass(), user.getId());
-        Car tempCar = tempUser.getCar();
-        tempUser = user;
-        tempUser.setCar(tempCar);
-        genericRep.merge(tempUser);
+        try {
+            User tempUser = genericRep.find(user.getClass(), user.getId());
+            Car tempCar = tempUser.getCar();
+            tempUser = user;
+            tempUser.setCar(tempCar);
+            genericRep.merge(tempUser);
+        } catch (Exception e) {
+            System.out.println("Error in service updateUser - " + e);
+        }
     }
 
     @Transactional
     @Override
     public <T> void deleteById(Class<T> tClass, long id) {
-        genericRep.delete(genericRep.find(tClass, id));
+        try {
+            genericRep.delete(genericRep.find(tClass, id));
+        } catch (Exception e) {
+            System.out.println("Error in service deleteById - " + e);
+        }
     }
 
     @Transactional
     @Override
     public void deleteCarFromUser(long id) {
-        User tempUser = genericRep.find(User.class, id);
-        Car tempCar = tempUser.getCar();
-        tempUser.setCar(null);
-        genericRep.delete(tempCar);
+        try {
+            User tempUser = genericRep.find(User.class, id);
+            Car tempCar = tempUser.getCar();
+            tempUser.setCar(null);
+            genericRep.delete(tempCar);
+        } catch (Exception e) {
+            System.out.println("Error in service deleteCarFromUser - " + e);
+        }
     }
 
     @Transactional
     @Override
     public void saveCarForUser(Car car, long id) {
-        User user = genericRep.find(User.class, id);
-        user.setCar(car);
+        try {
+            User user = genericRep.find(User.class, id);
+            user.setCar(car);
+        } catch (Exception e) {
+            System.out.println("Error in service saveCarForUser - " + e);
+        }
     }
 
     @Transactional
     @Override
     public void updateCar(Car car, long id) {
-        User tempUser = genericRep.find(User.class, id);
-        tempUser.setCar(car);
+        try {
+            User tempUser = genericRep.find(User.class, id);
+            tempUser.setCar(car);
+        } catch (Exception e) {
+            System.out.println("Error in service updateCar - " + e);
+        }
     }
 
     @Override
     public <T> List<T> getList(Class<T> cls) {
-        return genericRep.allItems(cls);
+        try {
+            return genericRep.allItems(cls);
+        } catch (Exception e) {
+            System.out.println("Error in service getList - " + e);
+        }
+        return null;
     }
 
     @Transactional
     @Override
     public void recreateTable() {
-        genericRep.queryNameExecutor("Car.deleteTable");
-        genericRep.queryNameExecutor("Car.createTable");
-        genericRep.queryNameExecutor("User.deleteTable");
-        genericRep.queryNameExecutor("User.createTable");
+        try {
+            genericRep.queryNameExecutor("Car.deleteTable");
+            genericRep.queryNameExecutor("Car.createTable");
+            genericRep.queryNameExecutor("User.deleteTable");
+            genericRep.queryNameExecutor("User.createTable");
+        } catch (Exception e) {
+            System.out.println("Error in service recreateTable - " + e);
+        }
     }
 
     @Transactional
     @Override
     public void resetTable() {
-        genericRep.queryNameExecutor("User.cleanTable");
-        genericRep.queryNameExecutor("Car.cleanTable");
+        try {
+            genericRep.queryNameExecutor("User.cleanTable");
+            genericRep.queryNameExecutor("Car.cleanTable");
+        } catch (Exception e) {
+            System.out.println("Error in service resetTable - " + e);
+        }
     }
 
     @Override
     public <T> List<T> listSortById(Class<T> tClass) {
-        List<T> list = genericRep.allItems(tClass);
-        return list.stream()
-                .sorted(Comparator.comparingLong(UserTableServiceImp::getIdFromObject))
-                .collect(Collectors.toList());
+        try {
+            List<T> list = genericRep.allItems(tClass);
+            return list.stream()
+                    .sorted(Comparator.comparingLong(UserTableServiceImp::getIdFromObject))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.out.println("Error in service listSortById - " + e);
+        }
+        return null;
     }
 }
