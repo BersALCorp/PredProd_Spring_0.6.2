@@ -3,10 +3,10 @@ package web.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import web.repository.GenericRep;
 import web.model.Car;
 import web.model.MyEntity;
 import web.model.User;
+import web.repository.GenericRep;
 
 import java.util.Comparator;
 import java.util.List;
@@ -22,19 +22,30 @@ public class UserTableServiceImp implements UserTableService {
         this.genericRep = genericRep;
     }
 
+    private static long getIdFromObject(Object obj) {
+        if (obj instanceof MyEntity) {
+            return ((User) obj).getId();
+        } else return 0;
+    }
+
     @Override
     public <T> void add(T t) {
         genericRep.add(t);
     }
 
     @Override
-    public <T> T getById(Class<T> t, long e) {
-        return genericRep.find(t, e);
+    public <T> T getById(Class<T> tClass, long id) {
+        return genericRep.find(tClass, id);
     }
 
+    @Transactional
     @Override
-    public <T> void update(T t, Long id) {
-        genericRep.update(t, id);
+    public void updateUser(User user) {
+        User tempUser = genericRep.find(user.getClass(), user.getId());
+        Car tempCar = tempUser.getCar();
+        tempUser = user;
+        tempUser.setCar(tempCar);
+        genericRep.merge(tempUser);
     }
 
     @Override
@@ -43,8 +54,8 @@ public class UserTableServiceImp implements UserTableService {
     }
 
     @Override
-    public <T> void deleteById(Class<T> t, long id) {
-        genericRep.deleteById(t, id);
+    public <T> void deleteById(Class<T> tClass, long id) {
+        genericRep.deleteById(tClass, id);
     }
 
     @Transactional
@@ -54,22 +65,20 @@ public class UserTableServiceImp implements UserTableService {
         Car tempCar = tempUser.getCar();
         tempUser.setCar(null);
         genericRep.delete(tempCar);
-        genericRep.merge(tempUser);
     }
 
     @Transactional
     @Override
-    public void saveCarForUser(long id, Car car) {
+    public void saveCarForUser(Car car, long id) {
         User user = genericRep.find(User.class, id);
         user.setCar(car);
-        genericRep.merge(user);
     }
 
     @Transactional
     @Override
     public void updateCar(Car car, long id) {
         User tempUser = genericRep.find(User.class, id);
-        genericRep.update(car, tempUser.getCar().getId());
+        tempUser.setCar(car);
     }
 
     @Override
@@ -79,24 +88,24 @@ public class UserTableServiceImp implements UserTableService {
 
     @Transactional
     @Override
+    public void recreateTable() {
+        genericRep.queryNameExecutor("Car.deleteTable");
+        genericRep.queryNameExecutor("Car.createTable");
+        genericRep.queryNameExecutor("User.deleteTable");
+        genericRep.queryNameExecutor("User.createTable");
+    }
+
+    @Transactional
+    @Override
     public void resetTable() {
-        genericRep.queryExecutor("Car.deleteTable");
-        genericRep.queryExecutor("Car.createTable");
-        genericRep.queryExecutor("User.deleteTable");
-        genericRep.queryExecutor("User.createTable");
+        genericRep.queryNameExecutor("User.cleanTable");
     }
 
     @Override
-    public <T> List<T> listSortById(Class<T> t) {
-        List<T> list = genericRep.allItems(t);
+    public <T> List<T> listSortById(Class<T> tClass) {
+        List<T> list = genericRep.allItems(tClass);
         return list.stream()
                 .sorted(Comparator.comparingLong(UserTableServiceImp::getIdFromObject))
                 .collect(Collectors.toList());
-    }
-
-    private static long getIdFromObject(Object obj) {
-        if (obj instanceof MyEntity) {
-            return ((User) obj).getId();
-        } else return 0;
     }
 }

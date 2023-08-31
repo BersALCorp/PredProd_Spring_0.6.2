@@ -10,8 +10,6 @@ public interface GenericRep {
 
     <T> void merge(T entity);
 
-    <T> void update(T entity, long id);
-
     <T> void delete(T entity);
 
     <T> void deleteById(Class<T> t, long id);
@@ -20,5 +18,5 @@ public interface GenericRep {
 
     <T> List<T> allItems(Class<T> cls);
 
-    void queryExecutor(String namedQuery);
+    void queryNameExecutor(String namedQuery);
 }

@@ -36,7 +36,7 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> saveUser(@RequestBody User user) {
         try {
             userTableService.add(user);
-            User savedUser = userTableService.getById(User.class,user.getId());
+            User savedUser = userTableService.getById(User.class, user.getId());
 
             Map<String, Object> response = new HashMap<>();
             response.put("message", "User saved successfully.");
@@ -59,7 +59,7 @@ public class UserController {
                     carData.get("model").toString(),
                     carData.get("color").toString()
             );
-            userTableService.saveCarForUser(userId, car);
+            userTableService.saveCarForUser(car, userId);
             return ResponseEntity.ok(Map.of("message", "Car saved successfully."));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -102,7 +102,7 @@ public class UserController {
     @PostMapping("updateUser")
     public ResponseEntity<String> updateUser(@RequestBody User user) {
         try {
-            userTableService.update(user, user.getId());
+            userTableService.updateUser(user);
             return ResponseEntity.ok("User id: " + user.getId() + " update successfully.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error update user.");
@@ -129,10 +129,20 @@ public class UserController {
         }
     }
 
-    @PostMapping("clearTable")
-    public ResponseEntity<String> clearTable() {
+    @PostMapping("resetTable")
+    public ResponseEntity<String> resetTable() {
         try {
             userTableService.resetTable();
+            return ResponseEntity.ok(" deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting user");
+        }
+    }
+
+    @PostMapping("recreateTable")
+    public ResponseEntity<String> recreateTable() {
+        try {
+            userTableService.recreateTable();
             return ResponseEntity.ok(" deleted successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting user");
