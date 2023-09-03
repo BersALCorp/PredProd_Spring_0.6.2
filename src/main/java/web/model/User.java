@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.IOException;
 
 @NamedNativeQueries(value = {
@@ -112,12 +112,9 @@ public class User extends MyEntity {
 
     public static class SexEnumDeserializer extends JsonDeserializer<SexEnum> {
         @Override
-        public SexEnum deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-            String value = jsonParser.getValueAsString();
-            if (value != null) {
-                return SexEnum.fromValue(value);
-            }
-            return null;
+        public SexEnum deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            String value = parser.getValueAsString();
+            return (value != null) ? SexEnum.fromValue(value) : null;
         }
     }
 
@@ -125,10 +122,7 @@ public class User extends MyEntity {
         @Override
         public RoleEnum deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
             String value = jsonParser.getValueAsString();
-            if (value != null) {
-                return RoleEnum.fromValue(value);
-            }
-            return null;
+            return (value != null) ? RoleEnum.fromValue(value) : null;
         }
     }
 }

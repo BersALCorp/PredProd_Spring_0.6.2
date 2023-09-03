@@ -3,12 +3,12 @@ package web.repository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import java.util.List;
 
 @Repository
@@ -41,13 +41,13 @@ public class GenericRepImp implements GenericRep {
 
     @Transactional
     @Override
-    public <T> List<T> allItems(Class<T> tClass) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<T> cq = cb.createQuery(tClass);
-        Root<T> root = cq.from(tClass);
-        cq.select(root);
-        TypedQuery<T> query = entityManager.createQuery(cq);
-        return query.getResultList();
+    public <T> List<T> allItems(Class<T> clazz) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<T> query = builder.createQuery(clazz);
+        Root<T> root = query.from(clazz);
+        query.select(root);
+        TypedQuery<T> typedQuery = entityManager.createQuery(query);
+        return typedQuery.getResultList();
     }
 
     @Override

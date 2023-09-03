@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @NamedNativeQueries(value = {
         @NamedNativeQuery(name = "Car.cleanTable", query = "TRUNCATE TABLE cars CASCADE"),
