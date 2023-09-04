@@ -88,11 +88,11 @@
         <td>NEW PERSON</td>
         <td>
             <label for="newFirstName"></label>
-            <input type="text" id="newFirstName" name="firstName" value="">
+            <input type="text" id="newFirstName" name="firstName" th:value="${newFirstName != null ? newFirstName : ''}">
         </td>
         <td>
             <label for="newLastName"></label>
-            <input type="text" id="newLastName" name="lastName" value="">
+            <input type="text" id="newLastName" name="lastName" th:value="${newLastName != null ? newLastName : ''}">
         </td>
         <td>
             <label for="newSex"></label>
@@ -103,15 +103,15 @@
         </td>
         <td>
             <label for="newAge"></label>
-            <input type="number" id="newAge" name="age" min="0" step="1" value="">
+            <input type="number" id="newAge" name="age" min="0" step="1" th:value="${newAge != null ? newAge : ''}">
         </td>
         <td>
             <label for="newAddress"></label>
-            <input type="text" id="newAddress" name="address" value="">
+            <input type="text" id="newAddress" name="address" th:value="${newAddress != null ? newAddress : ''}">
         </td>
         <td>
             <label for="newEmail"></label>
-            <input type="email" id="newEmail" name="email" value="">
+            <input type="email" id="newEmail" name="email" th:value="${newEmail != null ? newEmail : ''}">
         </td>
         <td>
             <label for="newRole"></label>
@@ -126,6 +126,7 @@
             <button onclick="saveUser(this); return false;">ADD USER</button>
         </td>
     </tr>
+    </tbody>
     <tr>
         <td>
         <td>
@@ -159,6 +160,9 @@
             data[input.name] = input.value;
             input.setAttribute('disabled', 'disabled');
         });
+        data['firstName'] = data['firstName'] || '';
+
+        console.log('Data:', data);
 
         fetch('/saveUser', {
             method: 'POST',

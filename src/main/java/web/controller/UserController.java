@@ -35,6 +35,7 @@ public class UserController {
     @PostMapping("saveUser")
     public ResponseEntity<Map<String, Object>> saveUser(@RequestBody User user) {
         try {
+            System.out.println(user);
             userTableService.add(user);
             User savedUser = userTableService.getById(User.class, user.getId());
 
