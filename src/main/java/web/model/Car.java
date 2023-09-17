@@ -2,31 +2,24 @@ package web.model;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import javax.persistence.*;
 
 @NamedNativeQueries(value = {
         @NamedNativeQuery(name = "Car.cleanTable", query = "TRUNCATE TABLE cars CASCADE"),
         @NamedNativeQuery(name = "Car.deleteTable", query = "DROP TABLE IF EXISTS cars CASCADE"),
         @NamedNativeQuery(name = "Car.createTable", query = "CREATE TABLE IF NOT EXISTS cars ("
-                                                            + "id SERIAL PRIMARY KEY,"
-                                                            + "brand VARCHAR(255) NOT NULL,"
-                                                            + "series VARCHAR(255),"
-                                                            + "model VARCHAR(255),"
-                                                            + "color VARCHAR(255),"
-                                                            + "user_id BIGINT REFERENCES users(id) ON DELETE CASCADE"
-                                                            + ");"),
+                + "id SERIAL PRIMARY KEY,"
+                + "brand VARCHAR(255) NOT NULL,"
+                + "series VARCHAR(255),"
+                + "model VARCHAR(255),"
+                + "color VARCHAR(255),"
+                + "user_id BIGINT REFERENCES users(id) ON DELETE CASCADE"
+                + ");"),
 
 })
 
 @Entity
 @Table(name = "cars", schema = "public", catalog = "postgres")
-@Getter
-@Setter
-@NoArgsConstructor
 public class Car extends MyEntity {
     @Transient
     boolean toStringCalled;
@@ -46,6 +39,9 @@ public class Car extends MyEntity {
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    public Car() {
+    }
 
     public Car(String brand, String series, String model, String color) {
         this.brand = brand;
@@ -70,5 +66,63 @@ public class Car extends MyEntity {
         }
         sb.append('}');
         return sb.toString();
+    }
+
+
+    public boolean isToStringCalled() {
+        return toStringCalled;
+    }
+
+    public void setToStringCalled(boolean toStringCalled) {
+        this.toStringCalled = toStringCalled;
+    }
+
+    @Override
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public String getSeries() {
+        return series;
+    }
+
+    public void setSeries(String series) {
+        this.series = series;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

@@ -13,12 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class UserTableServiceImp implements UserTableService {
+public class UserServiceImp implements UserService {
 
     private final GenericRep genericRep;
 
     @Autowired
-    public UserTableServiceImp(GenericRep genericRep) {
+    public UserServiceImp(GenericRep genericRep) {
         this.genericRep = genericRep;
     }
 
@@ -37,14 +37,26 @@ public class UserTableServiceImp implements UserTableService {
         }
     }
 
+    @Transactional
+    @Override
+    public User saveUser(User user) {
+        try {
+            genericRep.add(user);
+            return user;
+        } catch (Exception e) {
+            System.out.println("Error in service saveUser - " + e);
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public <T> T getById(Class<T> tClass, long id) {
         try {
             return genericRep.find(tClass, id);
         } catch (Exception e) {
             System.out.println("Error in service getById - " + e);
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Transactional
@@ -58,6 +70,7 @@ public class UserTableServiceImp implements UserTableService {
             genericRep.merge(tempUser);
         } catch (Exception e) {
             System.out.println("Error in service updateUser - " + e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -68,6 +81,7 @@ public class UserTableServiceImp implements UserTableService {
             genericRep.delete(genericRep.find(tClass, id));
         } catch (Exception e) {
             System.out.println("Error in service deleteById - " + e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -81,6 +95,7 @@ public class UserTableServiceImp implements UserTableService {
             genericRep.delete(tempCar);
         } catch (Exception e) {
             System.out.println("Error in service deleteCarFromUser - " + e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -90,30 +105,38 @@ public class UserTableServiceImp implements UserTableService {
         try {
             User user = genericRep.find(User.class, id);
             user.setCar(car);
+            genericRep.merge(user);
         } catch (Exception e) {
             System.out.println("Error in service saveCarForUser - " + e);
+            throw new RuntimeException(e);
         }
     }
 
     @Transactional
     @Override
-    public void updateCar(Car car, long id) {
+    public void updateCar(Car car, Long id) {
         try {
-            User tempUser = genericRep.find(User.class, id);
-            tempUser.setCar(car);
+            Car tempCar = genericRep.find(User.class, id).getCar();
+            tempCar.setBrand(car.getBrand());
+            tempCar.setSeries(car.getSeries());
+            tempCar.setModel(car.getModel());
+            tempCar.setColor(car.getColor());
+            genericRep.merge(tempCar);
         } catch (Exception e) {
             System.out.println("Error in service updateCar - " + e);
+            throw new RuntimeException(e);
         }
     }
 
+    @Transactional
     @Override
     public <T> List<T> getList(Class<T> cls) {
         try {
             return genericRep.allItems(cls);
         } catch (Exception e) {
             System.out.println("Error in service getList - " + e);
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Transactional
@@ -126,6 +149,7 @@ public class UserTableServiceImp implements UserTableService {
             genericRep.queryNameExecutor("User.createTable");
         } catch (Exception e) {
             System.out.println("Error in service recreateTable - " + e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -137,6 +161,7 @@ public class UserTableServiceImp implements UserTableService {
             genericRep.queryNameExecutor("Car.cleanTable");
         } catch (Exception e) {
             System.out.println("Error in service resetTable - " + e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -145,7 +170,7 @@ public class UserTableServiceImp implements UserTableService {
         try {
             List<T> list = genericRep.allItems(tClass);
             return list.stream()
-                    .sorted(Comparator.comparingLong(UserTableServiceImp::getIdFromObject))
+                    .sorted(Comparator.comparingLong(UserServiceImp::getIdFromObject))
                     .collect(Collectors.toList());
         } catch (Exception e) {
             System.out.println("Error in service listSortById - " + e);

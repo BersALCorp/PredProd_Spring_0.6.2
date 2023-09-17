@@ -88,11 +88,11 @@
         <td>NEW PERSON</td>
         <td>
             <label for="newFirstName"></label>
-            <input type="text" id="newFirstName" name="firstName" value="">
+            <input type="text" id="newFirstName" name="firstName" th:value="${newFirstName != null ? newFirstName : ''}">
         </td>
         <td>
             <label for="newLastName"></label>
-            <input type="text" id="newLastName" name="lastName" value="">
+            <input type="text" id="newLastName" name="lastName" th:value="${newLastName != null ? newLastName : ''}">
         </td>
         <td>
             <label for="newSex"></label>
@@ -103,15 +103,15 @@
         </td>
         <td>
             <label for="newAge"></label>
-            <input type="number" id="newAge" name="age" min="0" step="1" value="">
+            <input type="number" id="newAge" name="age" min="0" step="1" th:value="${newAge != null ? newAge : ''}">
         </td>
         <td>
             <label for="newAddress"></label>
-            <input type="text" id="newAddress" name="address" value="">
+            <input type="text" id="newAddress" name="address" th:value="${newAddress != null ? newAddress : ''}">
         </td>
         <td>
             <label for="newEmail"></label>
-            <input type="email" id="newEmail" name="email" value="">
+            <input type="email" id="newEmail" name="email" th:value="${newEmail != null ? newEmail : ''}">
         </td>
         <td>
             <label for="newRole"></label>
@@ -126,6 +126,7 @@
             <button onclick="saveUser(this); return false;">ADD USER</button>
         </td>
     </tr>
+    </tbody>
     <tr>
         <td>
         <td>
@@ -137,7 +138,6 @@
             <button onclick="recreateTable()">RECREATE TABLE</button>
         </td>
     </tr>
-    </tbody>
 </table>
 
 <div id="popup" class="popup">
@@ -159,6 +159,9 @@
             data[input.name] = input.value;
             input.setAttribute('disabled', 'disabled');
         });
+        data['firstName'] = data['firstName'] || '';
+
+        console.log('Data:', data);
 
         fetch('/saveUser', {
             method: 'POST',
@@ -171,15 +174,13 @@
                 if (response.ok) {
                     return response.json();
                 } else {
-                    throw new Error('Request failed');
+                    throw new Error('Request saving user failed');
                 }
             })
             .then(responseData => {
-                const newUser = responseData.user;
-                const message = responseData.message;
+                const newUser = responseData;
 
                 console.log('User saved:', newUser);
-                console.log('massage:', message);
 
                 const newUserRow = createTableRow(newUser);
                 const tableBody = document.getElementById('userTableBody');
@@ -205,7 +206,7 @@
         button.style.display = 'none';
         button.previousElementSibling.style.display = 'inline-block';
         fetch('/updateUser', {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -225,27 +226,22 @@
     }
 
     function saveCar(userId) {
-        const brandInput = document.querySelector('input[name="brand"]');
-        const seriesInput = document.querySelector('input[name="series"]');
-        const modelInput = document.querySelector('input[name="model"]');
-        const colorInput = document.querySelector('input[name="color"]');
+        const inputs = document.querySelectorAll('input');
+        const car = {};
 
-        const carData = {
-            brand: brandInput.value,
-            series: seriesInput.value,
-            model: modelInput.value,
-            color: colorInput.value
-        };
+        inputs.forEach(input => {
+            car[input.name] = input.value;
+            input.setAttribute('disabled', 'disabled');
+        })
 
-        fetch('/saveCar', {
+        console.log('Car:', car);
+
+        fetch(`/saveCar?userId=${userId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                userId: userId,
-                carData: carData
-            })
+            body: JSON.stringify(car)
         })
             .then(response => {
                 if (response.ok) {
@@ -254,36 +250,28 @@
                     throw new Error('Request for save car failed');
                 }
             })
-            .then(responseText => {
-                console.log('User save car:', responseText);
-            })
             .catch(error => {
                 console.error('Error:', error);
             });
     }
 
     function updateCar(userId) {
-        const brandInput = document.querySelector('input[name="brand"]');
-        const seriesInput = document.querySelector('input[name="series"]');
-        const modelInput = document.querySelector('input[name="model"]');
-        const colorInput = document.querySelector('input[name="color"]');
+        const inputs = document.querySelectorAll('input');
+        const car = {};
 
-        const carData = {
-            brand: brandInput.value,
-            series: seriesInput.value,
-            model: modelInput.value,
-            color: colorInput.value
-        };
+        inputs.forEach(input => {
+            car[input.name] = input.value;
+            input.setAttribute('disabled', 'disabled');
+        })
 
-        fetch('/updateCar', {
-            method: 'POST',
+        car[userId] = userId;
+
+        fetch(`/updateCar?userId=${userId}`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                userId: userId,
-                carData: carData
-            })
+            body: JSON.stringify(car)
         })
             .then(response => {
                 if (response.ok) {
@@ -291,9 +279,6 @@
                 } else {
                     throw new Error('Request for update car failed');
                 }
-            })
-            .then(responseText => {
-                console.log('User update car:', responseText);
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -303,7 +288,7 @@
     function deleteCar(id) {
         const params = new URLSearchParams({id: id});
         return fetch(`/deleteCar?${params}`, {
-            method: 'POST'
+            method: 'DELETE'
         })
             .then(response => {
                 if (response.ok) {
@@ -329,7 +314,7 @@
         const params = new URLSearchParams({id: id});
 
         return fetch(`/deleteUser?${params}`, {
-            method: 'POST'
+            method: 'DELETE'
         })
             .then(response => {
                 if (response.ok) {
@@ -350,7 +335,7 @@
     function recreateTable() {
 
         return fetch(`/recreateTable`, {
-            method: 'POST'
+            method: 'DELETE'
         })
             .then(response => {
                 if (response.ok) {
@@ -371,7 +356,7 @@
     function resetTable() {
 
         return fetch(`/resetTable`, {
-            method: 'POST'
+            method: 'DELETE'
         })
             .then(response => {
                 if (response.ok) {
@@ -390,11 +375,9 @@
     }
 
     function getCarByUserId(id) {
-        // Выполните запрос на получение данных о машине с заданным идентификатором
-        // и верните результат в виде Promise
         const params = new URLSearchParams({id: id});
         return fetch(`/getcar?${params}`, {
-            method: 'POST'
+            method: 'GET'
         })
             .then(response => {
                 if (response.ok) {
@@ -404,12 +387,8 @@
                 }
             })
             .then(responseData => {
-                const gatsCar = responseData.car;
-                const message = responseData.message;
-
+                const gatsCar = responseData;
                 console.log('Car:', gatsCar);
-                console.log('massage:', message);
-
                 return gatsCar;
             })
             .catch(error => {
@@ -570,12 +549,12 @@
             editButton.style.display = 'none';
             deleteButton.style.display = 'none';
             addButton.style.display = 'inline-block';
-            saveButton.style.display = 'none'; // скрываем кнопку SAVE
+            saveButton.style.display = 'none';
         } else {
             editButton.style.display = 'inline-block';
             deleteButton.style.display = 'inline-block';
             addButton.style.display = 'none';
-            saveButton.style.display = 'none'; // отображаем кнопку SAVE
+            saveButton.style.display = 'none';
         }
 
 

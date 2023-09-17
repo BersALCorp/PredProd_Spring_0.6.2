@@ -7,9 +7,11 @@ import web.model.User;
 import java.util.List;
 
 @Service
-public interface UserTableService {
+public interface UserService {
 
     <T> void add(T t);
+
+    User saveUser(User user);
 
     void updateUser(User user);
 
@@ -17,7 +19,7 @@ public interface UserTableService {
 
     void saveCarForUser(Car car, long id);
 
-    void updateCar(Car car, long id);
+    void updateCar(Car car, Long id);
 
     <T> List<T> listSortById(Class<T> tClass);
 

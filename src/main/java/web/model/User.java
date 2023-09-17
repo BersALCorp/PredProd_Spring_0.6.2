@@ -5,9 +5,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.IOException;
@@ -30,9 +27,6 @@ import java.io.IOException;
 
 @Entity
 @Table(name = "users", schema = "public", catalog = "postgres")
-@Getter
-@Setter
-@NoArgsConstructor
 public class User extends MyEntity {
     @Transient
     boolean toStringCalled;
@@ -67,6 +61,7 @@ public class User extends MyEntity {
     @JoinColumn(name = "car_id")
     private Car car;
 
+    public User(){}
     public User(String firstName, String lastName, SexEnum sex, int age, String address, String email, RoleEnum role) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -112,12 +107,9 @@ public class User extends MyEntity {
 
     public static class SexEnumDeserializer extends JsonDeserializer<SexEnum> {
         @Override
-        public SexEnum deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-            String value = jsonParser.getValueAsString();
-            if (value != null) {
-                return SexEnum.fromValue(value);
-            }
-            return null;
+        public SexEnum deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            String value = parser.getValueAsString();
+            return (value != null) ? SexEnum.fromValue(value) : null;
         }
     }
 
@@ -125,11 +117,88 @@ public class User extends MyEntity {
         @Override
         public RoleEnum deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
             String value = jsonParser.getValueAsString();
-            if (value != null) {
-                return RoleEnum.fromValue(value);
-            }
-            return null;
+            return (value != null) ? RoleEnum.fromValue(value) : null;
         }
     }
-}
 
+    public boolean isToStringCalled() {
+        return toStringCalled;
+    }
+
+    public void setToStringCalled(boolean toStringCalled) {
+        this.toStringCalled = toStringCalled;
+    }
+
+    @Override
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public SexEnum getSex() {
+        return sex;
+    }
+
+    public void setSex(SexEnum sex) {
+        this.sex = sex;
+    }
+
+    public RoleEnum getRole() {
+        return role;
+    }
+
+    public void setRole(RoleEnum role) {
+        this.role = role;
+    }
+
+    public Car getCar() {
+        return car;
+    }
+
+    public void setCar(Car car) {
+        this.car = car;
+    }
+}
