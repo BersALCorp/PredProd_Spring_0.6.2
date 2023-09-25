@@ -2,7 +2,7 @@ package web.model;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @NamedNativeQueries(value = {
         @NamedNativeQuery(name = "Car.cleanTable", query = "TRUNCATE TABLE cars CASCADE"),
