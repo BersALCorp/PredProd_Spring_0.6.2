@@ -36,6 +36,7 @@ public class UserController {
             User savedUser = userService.saveUser(user);
             return ResponseEntity.ok(savedUser);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -46,7 +47,8 @@ public class UserController {
             userService.saveCarForUser(car, userId);
             return ResponseEntity.ok("Car saved successfully.");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error save car.");
         }
     }
 
@@ -56,7 +58,8 @@ public class UserController {
             userService.updateCar(car, userId);
             return ResponseEntity.ok("Car update successfully.");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error update car.");
         }
     }
 
@@ -67,6 +70,7 @@ public class UserController {
             if (car == null) car = new Car();
             return ResponseEntity.ok(car);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -77,6 +81,7 @@ public class UserController {
             userService.updateUser(user);
             return ResponseEntity.ok("User id: " + user.getId() + " update successfully.");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error update user.");
         }
     }
@@ -87,6 +92,7 @@ public class UserController {
             userService.deleteById(User.class, id);
             return ResponseEntity.ok("User id: " + id + " deleted successfully");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting user");
         }
     }
@@ -97,6 +103,7 @@ public class UserController {
             userService.deleteCarFromUser(id);
             return ResponseEntity.ok("Car from id: " + id + " deleted successfully");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting car");
         }
     }
@@ -107,6 +114,7 @@ public class UserController {
             userService.resetTable();
             return ResponseEntity.ok("Reset table successfully");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error reset table");
         }
     }
@@ -117,6 +125,7 @@ public class UserController {
             userService.recreateTable();
             return ResponseEntity.ok("Recreate table successfully");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error recreate table");
         }
     }
