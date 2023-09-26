@@ -11,3 +11,4 @@ public class MyEntity {
         this.id = id;
     }
 }
+
